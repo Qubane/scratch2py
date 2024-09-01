@@ -25,6 +25,17 @@ class ScratchList:
             return f"['{self.name}': {self.data[:10].__repr__()}, ...]"
 
 
+class Costume:
+    def __init__(self, **kwargs):
+        self.name: str = kwargs.get("name")
+        self.bitmap_resolution: int = kwargs.get("bitmapResolution")
+        self.data_format: str = kwargs.get("dataFormat")
+        self.asset_id: str = kwargs.get("assetId")
+        self.md5_ext: str = kwargs.get("md5ext")
+        self.rotation_center_x: float = kwargs.get("rotationCenterX")
+        self.rotation_center_y: float = kwargs.get("rotationCenterY")
+
+
 class Block:
     def __init__(self, **kwargs):
         self.name: str = kwargs.get("name")
@@ -53,7 +64,9 @@ class Target:
             self.blocks[key] = Block(**val, name=key)
         self.comments: dict = kwargs.get("comments")
         self.current_costume: int = kwargs.get("currentCostume")
-        self.costumes: list = kwargs.get("costumes")
+        self.costumes: list[Costume] = list()
+        for val in kwargs.get("costumes", []):
+            self.costumes.append(Costume(**val))
         self.sounds: list = kwargs.get("sounds")
         self.volume: int = kwargs.get("volume")
         self.layer_order: int = kwargs.get("layerOrder")
