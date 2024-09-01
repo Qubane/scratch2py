@@ -1,6 +1,28 @@
 import os
 import json
+from typing import Any
 from zipfile import ZipFile
+
+
+class ScratchVariable:
+    def __init__(self, name: str, value: Any):
+        self.name: str = name
+        self.value: Any = value
+
+    def __repr__(self):
+        return f"['{self.name}': {self.value.__repr__()}]"
+
+
+class ScratchList:
+    def __init__(self, name: str, data: list[Any]):
+        self.name: str = name
+        self.data: list[Any] = data
+
+    def __repr__(self):
+        if len(self.data) < 10:
+            return f"['{self.name}': {self.data.__repr__()}]"
+        else:
+            return f"['{self.name}': {self.data[:10].__repr__()}, ...]"
 
 
 class Block:
@@ -19,8 +41,12 @@ class Target:
     def __init__(self, **kwargs):
         self.is_stage: bool = kwargs.get("isStage")
         self.name: str = kwargs.get("name")
-        self.variable: dict[str, list] = kwargs.get("variables")
-        self.lists: dict[str, list] = kwargs.get("lists")
+        self.variable: dict[str, ScratchVariable] = dict()
+        for key, val in kwargs.get("variables", {}).items():
+            self.variable[key] = ScratchVariable(val[0], val[1])
+        self.lists: dict[str, ScratchList] = dict()
+        for key, val in kwargs.get("lists", {}).items():
+            self.lists[key] = ScratchList(val[0], val[1])
         self.broadcasts: dict[str, list] = kwargs.get("broadcasts")
         self.blocks: dict[str, Block] = dict()
         for key, val in kwargs.get("blocks", {}).items():
@@ -56,7 +82,7 @@ class Stage(Target):
 
 class Project:
     def __init__(self, data: dict):
-        self.targets: list[Target] = list()
+        self.targets: list[Stage | Sprite] = list()
         for val in data.get("targets", []):
             if val.get("isStage"):
                 self.targets.append(Stage(**val))
